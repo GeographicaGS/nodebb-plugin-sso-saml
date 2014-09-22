@@ -1,0 +1,14 @@
+{
+	"id": "nodebb-plugin-sso-saml",
+	"name": "NodeBB SAML SSO",
+	"description": "NodeBB Plugin that allows users to login/register via SAML.",
+	"url": "https://github.com/GeographicaGS/nodebb-plugin-sso-saml",
+	"library": "./library.js",
+	"hooks": [
+		{ "hook": "filter:auth.init", "method": "getStrategy" },
+		{ "hook": "filter:admin.header.build", "method": "addMenuItem" },
+		{ "hook": "static:app.load", "method": "init" },
+		{ "hook": "filter:user.delete", "method": "deleteUserData" }
+	],
+	"templates": "./templates"
+}
