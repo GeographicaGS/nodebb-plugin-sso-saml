@@ -1,4 +1,4 @@
-<h1><i class="fa fa-twitter-square"></i> Simple samp Authentication</h1>
+<h1> Simple samp Authentication</h1>
 <hr />
 
 <form>
@@ -10,7 +10,9 @@
 		<input type="text" data-field="sso:saml:idpentrypoint" title="IdP entry point" class="form-control input-lg" placeholder="IdP entry point"><br />
 		<input type="text" data-field="sso:saml:callbackpath" title="Callback path" class="form-control input-md" placeholder="Callback path"><br/>
 		<input type="text" data-field="sso:saml:issuer" title="Issuer string to supply to identity provider" class="form-control input-md" placeholder="Issuer string to supply to identity provider"><br/>
-		<input type="text" data-field="sso:saml:metadata" title="Metadata URL" class="form-control input-md" placeholder="Metadata URL">
+		<input type="text" data-field="sso:saml:metadata" title="Metadata URL" class="form-control input-md" placeholder="Metadata URL"><br/>
+
+		<input type="text" data-field="sso:saml:servercrt" title="Server CRT file" class="form-control input-md" placeholder="Server CRT file">
 
 	</div>
 </form>

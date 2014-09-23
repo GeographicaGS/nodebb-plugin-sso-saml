@@ -15,44 +15,47 @@
 		'name': "SAML",
 		'admin': {
 			'route': '/plugins/sso-saml',
-			'icon': 'fa-twitter-square'
+			'icon': 'fa-university'
 		}
 	});
 
 	var SAML = {};
+	var samlObj;
 
-	if (!meta.config['sso:saml:idpentrypoint'] || meta.config['sso:saml:callbackpath']) {
-		var err = new Error('Missing config variables');
-    	throw err;
-    }
+	if (meta.config['sso:saml:idpentrypoint'] && meta.config['sso:saml:callbackpath']&& meta.config["sso:saml:metadata"] && meta.config["sso:saml:issuer"]) {
+	
+		samlObj = new passportSAML({
+			    path: meta.config['sso:saml:callbackpath'],
+			    entryPoint: meta.config['sso:saml:idpentrypoint'],
+			    issuer: 'passport-saml',
+			    callbackUrl: nconf.get('url') + meta.config['sso:saml:callbackpath']
+		  	},
+		  	function(profile, done) {
+		  		
+		    	var user = {
+			        nameID: profile.nameID,
+			        nameIDFormat: profile.nameIDFormat,
+			        sn: profile.sn,
+			        cn: profile.cn,
+			        mail: profile.mail,
+			        eduPersonAffiliation: profile.eduPersonAffiliation,
+			        email: profile.email,
+			        username: profile.displayName
+			    };
 
-
-	var samlObj = new passportSAML({
-		    path: meta.config['sso:saml:callbackpath'],
-		    entryPoint: meta.config['sso:saml:idpentrypoint'],
-		    issuer: 'passport-saml',
-		    callbackUrl: nconf.get('url') + ':' + nconf.get('port') + meta.config['sso:saml:callbackpath']
-	  	},
-	  	function(profile, done) {
-	  		
-	    	var user = {
-		        nameID: profile.nameID,
-		        nameIDFormat: profile.nameIDFormat,
-		        sn: profile.sn,
-		        cn: profile.cn,
-		        mail: profile.mail,
-		        eduPersonAffiliation: profile.eduPersonAffiliation,
-		        email: profile.email
-		    };
-
-		    SAML.login(user.nameID,user.nameID,function(err, user) {
-				if (err) {
-					return done(err);
-				}
-				done(null, user);
-			});
-	  	}
-	);
+			    SAML.login(user.nameID,user.username,function(err, user) {
+					if (err) {
+						return done(err);
+					}
+					done(null, user);
+				});
+		  	}
+		);
+	}
+	else{
+		console.log("No config info")
+		console.log(meta.config);
+	}
 
 
 	SAML.init = function(app, middleware, controllers, callback) {
@@ -63,36 +66,49 @@
 		app.get('/admin/plugins/sso-saml', middleware.admin.buildHeader, render);
 		app.get('/api/admin/plugins/sso-saml', render);
 
-		app.get(meta.config["sso:saml:metadata"], function(req, res) {
-		  var cert = fs.readFileSync('/Users/alasarr/dev/nodebb/node_modules/nodebb-plugin-sso-saml/server.crt', 'utf-8');
-		  res.header("Content-Type", "application/xml");
-		  res.send(samlObj.generateServiceProviderMetadata(cert))
-		  
-		});
+		if (samlObj){
 
-		app.post(meta.config['sso:saml:callbackpath'],
-			passport.authenticate('saml', { successRedirect: '/',failureRedirect: '/', failureFlash: true })
-		);
+			if (meta.config["sso:saml:metadata"]) {
+				app.get(meta.config["sso:saml:metadata"], function(req, res) {
+					if (meta.config["sso:saml:servercrt"]){
+					 	var cert = fs.readFileSync(meta.config["sso:saml:servercrt"], 'utf-8');
+					  	res.header("Content-Type", "application/xml");
+					  	res.send(samlObj.generateServiceProviderMetadata(cert))	
+					}
+					else{
+						res.send("No servercrt specified. Please enter it at nodebb admin panel.");
+					}
+				});	
+			}
+			
+
+			app.post(meta.config['sso:saml:callbackpath'],
+				passport.authenticate('saml', { successRedirect: '/',failureRedirect: '/', failureFlash: true })
+			);
+		}
 	
 		callback();
 	};
 
 	SAML.getStrategy = function(strategies, callback) {
-		
-		passport.use(samlObj);
 
-		strategies.push({
-			name: 'saml',
-			url: '/auth/saml',
-			callbackURL: meta.config['sso:saml:callbackpath'],
-			icon: constants.admin.icon,
-			scope: ''
-		});
+		if (samlObj){
+		
+			passport.use(samlObj);
+
+			strategies.push({
+				name: 'saml',
+				url: '/auth/saml',
+				callbackURL: meta.config['sso:saml:callbackpath'],
+				icon: constants.admin.icon,
+				scope: ''
+			});
+		}
 
 		callback(null, strategies);
 	};
 
-	SAML.login = function(samlid,email, callback) {
+	SAML.login = function(samlid,username, callback) {
 
 		SAML.getUidBySAMLId(samlid, function(err, uid) {
 			if(err) {
@@ -102,11 +118,12 @@
 			if (uid !== null) {
 				// Existing User
 				callback(null, {
-					uid: uid
+				 	uid: uid
 				});
-			} else {
+			}
+			else {
 				// New User
-				user.create({username: email}, function(err, uid) {
+				user.create({username: username}, function(err, uid) {
 					if(err) {
 						return callback(err);
 					}
@@ -142,18 +159,18 @@
 	};
 
 	SAML.deleteUserData = function(uid, callback) {
-		// async.waterfall([
-		// 	async.apply(user.getUserField, uid, 'samlid'),
-		// 	function(oAuthIdToDelete, next) {
-		// 		db.deleteObjectField('twid:uid', oAuthIdToDelete, next);
-		// 	}
-		// ], function(err) {
-		// 	if (err) {
-		// 		winston.error('[sso-twitter] Could not remove OAuthId data for uid ' + uid + '. Error: ' + err);
-		// 		return callback(err);
-		// 	}
-		// 	callback(null, uid);
-		// });
+		async.waterfall([
+			async.apply(user.getUserField, uid, 'samlid'),
+			function(idToDelete, next) {
+				db.deleteObjectField('samlid:uid', idToDelete, next);
+			}
+		], function(err) {
+			if (err) {
+				winston.error('[sso-saml] Could not remove user data for uid ' + uid + '. Error: ' + err);
+				return callback(err);
+			}
+			callback(null, uid);
+		});
 	};
 
 	module.exports = SAML;
