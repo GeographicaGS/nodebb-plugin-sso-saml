@@ -17,7 +17,7 @@ NodeBB Plugin that allows users to login/register via SAML IDP
         - Server CRT file: Server crt path. Mandatory if used metadata url.
         
 
-## Support and about
+## Support
 
 If you need more info or if you need some help, please report an issue at https://github.com/GeographicaGS/nodebb-plugin-sso-saml/issues
 
