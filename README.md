@@ -16,9 +16,9 @@ NodeBB Plugin that allows users to login/register via SAML IDP
         - Metadata url: url where metadata will be served at. Optional.
         - Server CRT file: Server crt path. Mandatory if used metadata url
 
-##
+###
     If you need more info or if you need some help, please report an issue at https://github.com/GeographicaGS/nodebb-plugin-sso-saml/issues
 
 
-##
+###
     This plugin has been built on top of passport.saml, for more info visit https://github.com/bergie/passport-saml
