@@ -23,5 +23,4 @@ If you need more info or if you need some help, please report an issue at https:
 
 
 ## About
-    This plugin has been built on top of passport.saml, for more info visit https://github.com/bergie/passport-saml.
-    Developed by Alberto Asuero
+This plugin has been built on top of passport.saml, for more info visit https://github.com/bergie/passport-saml.
