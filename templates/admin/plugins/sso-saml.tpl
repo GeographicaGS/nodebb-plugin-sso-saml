@@ -14,6 +14,9 @@
 
 		<input type="text" data-field="sso:saml:servercrt" title="Server CRT file" class="form-control input-md" placeholder="Server CRT file">
 
+		<br/>
+		<input type="text" data-field="sso:saml:loginsuccessredirecturl" title="URL to redirect after a successfull login" class="form-control input-md" placeholder="URL to redirect after a successfull login. Leave empty to redirect to /. ">
+
 	</div>
 </form>
 

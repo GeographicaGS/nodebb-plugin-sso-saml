@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-sso-saml",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "NodeBB SAML SSO",
   "main": "library.js",
   "repository": {
@@ -30,5 +30,5 @@
     "passport-saml": "~0.5.3"
   },
   "homepage": "https://github.com/GeographicaGS/nodebb-plugin-sso-saml.git",
-  "_id": "nodebb-plugin-sso-saml@0.0.1"
+  "_id": "nodebb-plugin-sso-saml@0.0.2"
 }

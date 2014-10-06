@@ -23,15 +23,15 @@
 	var samlObj;
 
 	if (meta.config['sso:saml:idpentrypoint'] && meta.config['sso:saml:callbackpath']&& meta.config["sso:saml:metadata"] && meta.config["sso:saml:issuer"]) {
-	
+		
 		samlObj = new passportSAML({
 			    path: meta.config['sso:saml:callbackpath'],
 			    entryPoint: meta.config['sso:saml:idpentrypoint'],
-			    issuer: 'passport-saml',
+			    issuer: meta.config['sso:saml:issuer'],
 			    callbackUrl: nconf.get('url') + meta.config['sso:saml:callbackpath']
 		  	},
 		  	function(profile, done) {
-		  		
+	
 		    	var user = {
 			        nameID: profile.nameID,
 			        nameIDFormat: profile.nameIDFormat,
@@ -40,10 +40,10 @@
 			        mail: profile.mail,
 			        eduPersonAffiliation: profile.eduPersonAffiliation,
 			        email: profile.email,
-			        username: profile.displayName
+			        username: profile.eduPersonNickname
 			    };
 
-			    SAML.login(user.nameID,user.username,function(err, user) {
+			    SAML.login(user,function(err, user) {
 					if (err) {
 						return done(err);
 					}
@@ -81,9 +81,18 @@
 				});	
 			}
 			
-
 			app.post(meta.config['sso:saml:callbackpath'],
-				passport.authenticate('saml', { successRedirect: '/',failureRedirect: '/', failureFlash: true })
+				passport.authenticate('saml'),
+				function(req, res, next){
+					if (meta.config['sso:saml:loginsuccessredirecturl']){
+						res.redirect(meta.config['sso:saml:loginsuccessredirecturl']);
+					}
+					else{
+						res.redirect("/");
+					}
+					
+				}
+		
 			);
 		}
 	
@@ -108,9 +117,9 @@
 		callback(null, strategies);
 	};
 
-	SAML.login = function(samlid,username, callback) {
+	SAML.login = function(userdata, callback) {
 
-		SAML.getUidBySAMLId(samlid, function(err, uid) {
+		SAML.getUidBySAMLId(userdata.username, function(err, uid) {
 			if(err) {
 				return callback(err);
 			}
@@ -122,14 +131,24 @@
 				});
 			}
 			else {
+				console.log({
+					username: userdata.username,
+					email: userdata.email,
+					fullname : userdata.cn + " " + userdata.sn
+							
+				});
 				// New User
-				user.create({username: username}, function(err, uid) {
+				user.create({
+					username: userdata.username,
+					email: userdata.email,
+					fullname : userdata.cn + " " + userdata.sn
+							
+				}, function(err, uid) {
 					if(err) {
 						return callback(err);
 					}
-					// Save twitter-specific information to the user
-					user.setUserField(uid, 'samlid', samlid);
-					db.setObjectField('samlid:uid', samlid, uid);
+					user.setUserField(uid, 'samlid', userdata.username);
+					db.setObjectField('samlid:uid', userdata.username, uid);
 
 					callback(null, {
 						uid: uid
