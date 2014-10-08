@@ -17,6 +17,12 @@
 		<br/>
 		<input type="text" data-field="sso:saml:loginsuccessredirecturl" title="URL to redirect after a successfull login" class="form-control input-md" placeholder="URL to redirect after a successfull login. Leave empty to redirect to /. ">
 
+		<br/>
+		<input type="text" data-field="sso:saml:logouturl" title="Logout URL" class="form-control input-md" placeholder="Logout URL ">
+
+		<br/>
+		<input type="text" data-field="sso:saml:logoutredirecturl" title="Logout redirect URL" class="form-control input-md" placeholder="Logout redirect URL">		
+
 	</div>
 </form>
 

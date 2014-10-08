@@ -9,7 +9,8 @@
 		fs = module.parent.require('fs'),
 		path = module.parent.require('path'),
 		nconf = module.parent.require('nconf'),
-		async = module.parent.require('async');
+		async = module.parent.require('async'),
+		winston = require('winston');
 
 	var constants = Object.freeze({
 		'name': "SAML",
@@ -94,6 +95,30 @@
 				}
 		
 			);
+
+			if (meta.config['sso:saml:logouturl']) {
+
+				app.get(meta.config['sso:saml:logouturl'],function(req,res){
+					if (req.user && parseInt(req.user.uid, 10) > 0) {
+						winston.info('[Auth] Session ' + req.sessionID + ' logout (uid: ' + req.user.uid + ')');
+
+						var ws = module.parent.require('./socket.io');
+						ws.logoutUser(req.user.uid);
+
+						req.logout();
+
+						if (meta.config['sso:saml:logoutredirecturl']){
+							res.redirect(meta.config['sso:saml:logoutredirecturl']);
+						}
+						else{
+							res.redirect("/");
+						}
+					}
+					
+
+				});
+			}
+			
 		}
 	
 		callback();
@@ -131,12 +156,7 @@
 				});
 			}
 			else {
-				console.log({
-					username: userdata.username,
-					email: userdata.email,
-					fullname : userdata.cn + " " + userdata.sn
-							
-				});
+
 				// New User
 				user.create({
 					username: userdata.username,

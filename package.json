@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-sso-saml",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "NodeBB SAML SSO",
   "main": "library.js",
   "repository": {
@@ -27,7 +27,8 @@
   "readme": "# NodeBB SAML SSO\n\nNodeBB Plugin that allows users to login/register via a account.\n\n## Installation\n\n    npm install nodebb-plugin-sso-saml\n",
   "readmeFilename": "README.md",
   "dependencies": {
-    "passport-saml": "~0.5.3"
+    "passport-saml": "~0.5.3",
+    "winston" : "0.8.1"
   },
   "homepage": "https://github.com/GeographicaGS/nodebb-plugin-sso-saml.git",
   "_id": "nodebb-plugin-sso-saml@0.0.2"
