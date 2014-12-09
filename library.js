@@ -46,7 +46,7 @@
 			        //eduPersonAffiliation: profile.eduPersonAffiliation,
 			        email: profile.mail,
 				//email: profile.email,
-			        username: profile['urn:oid:1.3.6.1.4.1.5923.1.1.1.2'] // eduPersonNickname
+			        username: profile['urn:oid:1.3.6.1.4.1.5923.1.1.1.2'], // eduPersonNickname
 				//username: profile.eduPersonNickname
 			    };
 
