@@ -29,19 +29,25 @@
 			    path: meta.config['sso:saml:callbackpath'],
 			    entryPoint: meta.config['sso:saml:idpentrypoint'],
 			    issuer: meta.config['sso:saml:issuer'],
-			    callbackUrl: nconf.get('url') + meta.config['sso:saml:callbackpath']
+			    callbackUrl: nconf.get('url') + meta.config['sso:saml:callbackpath'],
+			    disableRequestedAuthnContext: true,
+			    identifierFormat: null
 		  	},
 		  	function(profile, done) {
-	
+			console.log(profile);	
 		    	var user = {
 			        nameID: profile.nameID,
 			        nameIDFormat: profile.nameIDFormat,
-			        sn: profile.sn,
-			        cn: profile.cn,
-			        mail: profile.mail,
-			        eduPersonAffiliation: profile.eduPersonAffiliation,
-			        email: profile.email,
-			        username: profile.eduPersonNickname
+			        sn: profile['urn:oid:2.5.4.4'], // sn
+				//sn: profile.sn,
+			        cn: profile['urn:oid:2.5.4.42'], // givenname
+				//cn: profile.cn,
+			        //mail: profile.mail,
+			        //eduPersonAffiliation: profile.eduPersonAffiliation,
+			        email: profile.mail,
+				//email: profile.email,
+			        username: profile['urn:oid:1.3.6.1.4.1.5923.1.1.1.2'], // eduPersonNickname
+				//username: profile.eduPersonNickname
 			    };
 
 			    SAML.login(user,function(err, user) {
@@ -156,12 +162,12 @@
 				});
 			}
 			else {
-
+				console.log(userdata);
 				// New User
 				user.create({
 					username: userdata.username,
 					email: userdata.email,
-					fullname : userdata.cn + " " + userdata.sn
+					fullname : userdata.first_name + " " + userdata.last_name
 							
 				}, function(err, uid) {
 					if(err) {
