@@ -65,30 +65,31 @@
 	}
 
 
-	SAML.init = function(app, middleware, controllers, callback) {
+	SAML.init = function(params, callback) {
+
 		function render(req, res, next) {
 			res.render('admin/plugins/sso-saml', {});
 		}
 
-		app.get('/admin/plugins/sso-saml', middleware.admin.buildHeader, render);
-		app.get('/api/admin/plugins/sso-saml', render);
+		params.router.get('/admin/plugins/sso-saml', params.middleware.admin.buildHeader, render);
+		params.router.get('/api/admin/plugins/sso-saml', render);
 
 		if (samlObj){
 
 			if (meta.config["sso:saml:metadata"]) {
-				app.get(meta.config["sso:saml:metadata"], function(req, res) {
+				params.router.get(meta.config["sso:saml:metadata"], function(req, res) {
 					if (meta.config["sso:saml:servercrt"]){
 					 	var cert = fs.readFileSync(meta.config["sso:saml:servercrt"], 'utf-8');
 					  	res.header("Content-Type", "application/xml");
-					  	res.send(samlObj.generateServiceProviderMetadata(cert))	
+					  	res.send(samlObj.generateServiceProviderMetadata(cert))
 					}
 					else{
 						res.send("No servercrt specified. Please enter it at nodebb admin panel.");
 					}
-				});	
+				});
 			}
-			
-			app.post(meta.config['sso:saml:callbackpath'],
+
+			params.router.post(meta.config['sso:saml:callbackpath'],
 				passport.authenticate('saml'),
 				function(req, res, next){
 					if (meta.config['sso:saml:loginsuccessredirecturl']){
@@ -97,14 +98,14 @@
 					else{
 						res.redirect("/");
 					}
-					
+
 				}
-		
+
 			);
 
 			if (meta.config['sso:saml:logouturl']) {
 
-				app.get(meta.config['sso:saml:logouturl'],function(req,res){
+				params.router.get(meta.config['sso:saml:logouturl'],function(req,res){
 					if (req.user && parseInt(req.user.uid, 10) > 0) {
 						winston.info('[Auth] Session ' + req.sessionID + ' logout (uid: ' + req.user.uid + ')');
 
@@ -120,13 +121,13 @@
 							res.redirect("/");
 						}
 					}
-					
+
 
 				});
 			}
-			
+
 		}
-	
+
 		callback();
 	};
 
